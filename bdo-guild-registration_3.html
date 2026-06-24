@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guild Event Registration — Black Desert Online</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c9a227;--gold-light:#f0d060;--gold-dim:#7a5c10;
+  --blue:#1a6fff;--blue-bright:#4da6ff;--blue-dim:#0a2a6e;
+  --arcane:#7b2fff;--arcane-bright:#b06aff;
+  --bg:#03050f;--bg2:#060d1a;--bg3:#0a1528;
+  --text:#d4b896;--text-bright:#f0e0c0;--text-dim:#7a6a50;
+  --border-gold:rgba(201,162,39,0.4);--border-blue:rgba(26,111,255,0.4);
+  --glow-gold:0 0 20px rgba(201,162,39,0.6),0 0 60px rgba(201,162,39,0.2);
+  --glow-blue:0 0 20px rgba(77,166,255,0.6),0 0 60px rgba(26,111,255,0.2);
+  --glow-arcane:0 0 20px rgba(176,106,255,0.5),0 0 60px rgba(123,47,255,0.2);
+}
+html{height:100%;scroll-behavior:smooth}
+body{
+  min-height:100vh;background:var(--bg);color:var(--text);
+  font-family:'Georgia',serif;overflow-x:hidden;
+  background-image:radial-gradient(ellipse 80% 60% at 50% 0%,#0a1a3a 0%,transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%,#0d0820 0%,transparent 70%);
+}
+
+/* ── CANVAS LAYER ── */
+#bgCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+
+/* ── LAYOUT ── */
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 1rem 4rem}
+
+/* ── HEADER ── */
+header{text-align:center;padding:3rem 1rem 0;width:100%;max-width:800px}
+.header-eyebrow{
+  font-size:11px;letter-spacing:.35em;text-transform:uppercase;
+  color:var(--blue-bright);margin-bottom:1rem;
+  text-shadow:0 0 12px var(--blue-bright);
+}
+.header-title{
+  font-size:clamp(2rem,6vw,3.8rem);font-weight:400;
+  color:var(--gold-light);line-height:1.1;margin-bottom:.5rem;
+  text-shadow:var(--glow-gold),0 0 120px rgba(201,162,39,0.15);
+  letter-spacing:.04em;
+}
+.header-subtitle{
+  font-size:clamp(.85rem,2vw,1.05rem);color:var(--text-dim);
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:2rem;
+}
+.rune-divider{
+  display:flex;align-items:center;gap:1rem;justify-content:center;margin-bottom:2.5rem;
+}
+.rune-divider-line{flex:1;max-width:200px;height:1px;background:linear-gradient(90deg,transparent,var(--border-gold),transparent)}
+.rune-divider-symbol{font-size:1.4rem;color:var(--gold);text-shadow:var(--glow-gold);animation:runeGlow 3s ease-in-out infinite alternate}
+@keyframes runeGlow{from{text-shadow:0 0 8px var(--gold);opacity:.7}to{text-shadow:0 0 30px var(--gold-light),0 0 60px var(--gold);opacity:1}}
+
+/* ── GOBLET ── */
+.goblet-wrap{position:relative;width:220px;height:280px;margin:0 auto 2rem;flex-shrink:0}
+.rune-ring{
+  position:absolute;top:50%;left:50%;width:260px;height:260px;
+  transform:translate(-50%,-50%);
+  animation:ringRotate 20s linear infinite;
+}
+@keyframes ringRotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.rune-ring svg{width:100%;height:100%}
+.goblet-svg{width:220px;height:280px;filter:drop-shadow(0 0 18px rgba(77,166,255,.6)) drop-shadow(0 0 40px rgba(26,111,255,.3))}
+.flame-wrap{position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:120px;height:100px;pointer-events:none}
+.flame{position:absolute;bottom:0;left:50%;transform:translateX(-50%);animation:flicker 1.8s ease-in-out infinite alternate}
+@keyframes flicker{
+  0%{transform:translateX(-50%) scaleY(1) scaleX(1);opacity:1}
+  30%{transform:translateX(-48%) scaleY(1.08) scaleX(.94);opacity:.9}
+  60%{transform:translateX(-52%) scaleY(.96) scaleX(1.04);opacity:1}
+  100%{transform:translateX(-50%) scaleY(1.12) scaleX(.92);opacity:.85}
+}
+.flame svg{filter:drop-shadow(0 0 14px #4da6ff) drop-shadow(0 0 30px #1a6fff) drop-shadow(0 0 60px rgba(123,47,255,.4))}
+
+/* ── FORM CARD ── */
+.form-wrap{
+  position:relative;width:100%;max-width:560px;margin:0 auto;
+}
+.form-card{
+  position:relative;
+  background:linear-gradient(160deg,rgba(10,21,40,.97) 0%,rgba(4,8,20,.98) 100%);
+  border:1px solid var(--border-gold);
+  border-radius:4px;
+  padding:2.5rem 2rem;
+  box-shadow:var(--glow-gold),inset 0 0 60px rgba(10,30,80,.5),0 40px 80px rgba(0,0,0,.8);
+  overflow:hidden;
+}
+.form-card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(201,162,39,.015) 0px,transparent 2px,transparent 40px);
+}
+.corner{position:absolute;width:24px;height:24px;border-color:var(--gold);border-style:solid;opacity:.7}
+.corner-tl{top:8px;left:8px;border-width:2px 0 0 2px}
+.corner-tr{top:8px;right:8px;border-width:2px 2px 0 0}
+.corner-bl{bottom:8px;left:8px;border-width:0 0 2px 2px}
+.corner-br{bottom:8px;right:8px;border-width:0 2px 2px 0}
+
+.form-title{
+  text-align:center;font-size:1rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:2rem;
+  text-shadow:0 0 14px var(--gold);
+}
+
+.field{margin-bottom:1.4rem}
+label{
+  display:block;font-size:11px;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--blue-bright);margin-bottom:.5rem;
+  text-shadow:0 0 8px var(--blue-bright);
+}
+input,select{
+  width:100%;background:rgba(5,12,30,.8);
+  border:1px solid rgba(77,166,255,.25);
+  border-radius:2px;padding:.7rem .9rem;
+  color:var(--text-bright);font-family:'Georgia',serif;font-size:.95rem;
+  outline:none;transition:border-color .25s,box-shadow .25s;
+  appearance:none;-webkit-appearance:none;
+}
+input:focus,select:focus{
+  border-color:rgba(77,166,255,.7);
+  box-shadow:0 0 0 3px rgba(26,111,255,.12),0 0 20px rgba(26,111,255,.15);
+}
+input::placeholder{color:var(--text-dim);font-style:italic}
+select option{background:#060d1a;color:var(--text-bright)}
+
+/* number input — hide spinners */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+
+.submit-btn{
+  position:relative;width:100%;padding:.85rem;margin-top:.5rem;
+  background:linear-gradient(135deg,rgba(10,42,110,.9) 0%,rgba(5,20,60,.95) 100%);
+  border:1px solid var(--blue-bright);border-radius:2px;
+  color:var(--gold-light);font-family:'Georgia',serif;font-size:1rem;
+  letter-spacing:.2em;text-transform:uppercase;cursor:pointer;
+  overflow:hidden;transition:all .25s;
+  box-shadow:0 0 20px rgba(26,111,255,.25);
+}
+.submit-btn:hover{
+  border-color:var(--gold);color:#fff;
+  box-shadow:var(--glow-blue),0 0 40px rgba(201,162,39,.2);
+  transform:translateY(-1px);
+}
+.submit-btn:active{transform:translateY(0) scale(.99)}
+.submit-btn .btn-sparks{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+
+/* ── SUBMIT ANIMATION OVERLAY ── */
+#submitOverlay{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.0);pointer-events:none;
+  justify-content:center;align-items:center;
+}
+#submitOverlay.active{display:flex;pointer-events:all}
+.fly-text{
+  position:fixed;font-size:1.4rem;color:var(--gold-light);
+  text-shadow:var(--glow-gold);pointer-events:none;z-index:200;
+  white-space:nowrap;transition:none;
+}
+.success-msg{
+  text-align:center;background:rgba(4,8,20,.97);
+  border:1px solid var(--gold);padding:2.5rem 3rem;border-radius:4px;
+  box-shadow:var(--glow-gold),0 40px 80px rgba(0,0,0,.9);
+  animation:successPop .5s cubic-bezier(.175,.885,.32,1.275) both;
+  max-width:420px;width:90%;
+}
+@keyframes successPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.success-msg .s-icon{font-size:3rem;margin-bottom:1rem;text-shadow:var(--glow-gold);animation:runeGlow 1.5s ease-in-out infinite alternate}
+.success-msg h2{color:var(--gold-light);font-size:1.4rem;margin-bottom:.5rem;letter-spacing:.1em}
+.success-msg p{color:var(--text);font-size:.9rem;line-height:1.6}
+.success-close{
+  margin-top:1.5rem;padding:.5rem 1.5rem;
+  background:transparent;border:1px solid var(--border-gold);
+  color:var(--gold);font-family:'Georgia',serif;cursor:pointer;letter-spacing:.15em;
+  transition:all .2s;
+}
+.success-close:hover{background:rgba(201,162,39,.1);box-shadow:var(--glow-gold)}
+
+
+
+
+
+@media(max-width:600px){
+  .form-card{padding:1.75rem 1.25rem}
+  .goblet-wrap{width:170px;height:216px}
+  .goblet-svg{width:170px;height:216px}
+  .rune-ring{width:210px;height:210px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="page" id="pageRoot">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-eyebrow">⚔ Black Desert Online · Guild Event</div>
+    <h1 class="header-title">The Rift Covenant</h1>
+    <p class="header-subtitle">Sacred Registry of Champions</p>
+    <div class="rune-divider">
+      <div class="rune-divider-line"></div>
+      <div class="rune-divider-symbol">᛭</div>
+      <div class="rune-divider-line"></div>
+    </div>
+  </header>
+
+  <!-- GOBLET -->
+  <div class="goblet-wrap">
+    <!-- Rotating rune ring -->
+    <div class="rune-ring">
+      <svg viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="130" cy="130" r="124" stroke="rgba(77,166,255,0.25)" stroke-width="1" stroke-dasharray="4 8"/>
+        <circle cx="130" cy="130" r="112" stroke="rgba(201,162,39,0.2)" stroke-width="0.5"/>
+        <!-- Rune glyphs around ring -->
+        <text font-size="13" fill="rgba(77,166,255,0.7)" font-family="serif">
+          <textPath href="#ring-path">ᚠ · ᚢ · ᚦ · ᚨ · ᚱ · ᚲ · ᚷ · ᚹ · ᚺ · ᚾ · ᛁ · ᛃ · ᛇ · ᛈ · ᛉ · ᛊ · ᛏ · ᛒ · ᛖ · ᛗ · ᛚ · ᛜ · ᛞ · ᛟ · </textPath>
+        </text>
+        <defs>
+          <path id="ring-path" d="M130,10 a120,120 0 1,1 -0.1,0 z"/>
+        </defs>
+        <!-- Corner diamonds -->
+        <polygon points="130,6 134,12 130,18 126,12" fill="rgba(201,162,39,0.6)"/>
+        <polygon points="254,130 248,134 242,130 248,126" fill="rgba(201,162,39,0.6)"/>
+        <polygon points="130,254 126,248 130,242 134,248" fill="rgba(201,162,39,0.6)"/>
+        <polygon points="6,130 12,126 18,130 12,134" fill="rgba(201,162,39,0.6)"/>
+      </svg>
+    </div>
+    <!-- Flame -->
+    <div class="flame-wrap">
+      <div class="flame">
+        <svg width="90" height="90" viewBox="0 0 90 90" fill="none">
+          <ellipse cx="45" cy="80" rx="25" ry="8" fill="rgba(26,111,255,0.3)"/>
+          <!-- outer flame -->
+          <path d="M45 5 C38 20 22 28 22 50 C22 68 32 82 45 82 C58 82 68 68 68 50 C68 28 52 20 45 5Z" fill="url(#fg1)" opacity="0.9"/>
+          <!-- inner flame -->
+          <path d="M45 22 C41 32 33 38 33 52 C33 64 38 74 45 74 C52 74 57 64 57 52 C57 38 49 32 45 22Z" fill="url(#fg2)" opacity="0.95"/>
+          <!-- core -->
+          <path d="M45 38 C43 44 40 48 40 55 C40 62 42 68 45 68 C48 68 50 62 50 55 C50 48 47 44 45 38Z" fill="url(#fg3)"/>
+          <defs>
+            <radialGradient id="fg1" cx="50%" cy="80%" r="60%">
+              <stop offset="0%" stop-color="#4da6ff"/>
+              <stop offset="50%" stop-color="#1a6fff"/>
+              <stop offset="100%" stop-color="#7b2fff" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="fg2" cx="50%" cy="70%" r="55%">
+              <stop offset="0%" stop-color="#a0d4ff"/>
+              <stop offset="60%" stop-color="#4da6ff"/>
+              <stop offset="100%" stop-color="#1a6fff" stop-opacity="0.5"/>
+            </radialGradient>
+            <radialGradient id="fg3" cx="50%" cy="60%" r="50%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="40%" stop-color="#c0e8ff"/>
+              <stop offset="100%" stop-color="#4da6ff" stop-opacity="0.6"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+    <!-- Goblet — richly detailed ornate chalice -->
+    <svg class="goblet-svg" viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Gold gradients -->
+        <linearGradient id="gBase" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1a1000"/>
+          <stop offset="20%" stop-color="#6b4a08"/>
+          <stop offset="45%" stop-color="#f0d060"/>
+          <stop offset="55%" stop-color="#c9a227"/>
+          <stop offset="80%" stop-color="#6b4a08"/>
+          <stop offset="100%" stop-color="#1a1000"/>
+        </linearGradient>
+        <linearGradient id="gStem" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1a1000"/>
+          <stop offset="30%" stop-color="#8a6010"/>
+          <stop offset="50%" stop-color="#e8c840"/>
+          <stop offset="70%" stop-color="#8a6010"/>
+          <stop offset="100%" stop-color="#1a1000"/>
+        </linearGradient>
+        <linearGradient id="gKnop" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#0d0800"/>
+          <stop offset="25%" stop-color="#7a5500"/>
+          <stop offset="50%" stop-color="#f0d060"/>
+          <stop offset="75%" stop-color="#7a5500"/>
+          <stop offset="100%" stop-color="#0d0800"/>
+        </linearGradient>
+        <linearGradient id="gCupSide" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1a1000"/>
+          <stop offset="15%" stop-color="#6b4a08"/>
+          <stop offset="35%" stop-color="#c9a227"/>
+          <stop offset="50%" stop-color="#f0d060"/>
+          <stop offset="65%" stop-color="#c9a227"/>
+          <stop offset="85%" stop-color="#6b4a08"/>
+          <stop offset="100%" stop-color="#1a1000"/>
+        </linearGradient>
+        <linearGradient id="gRim" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#2a1c00"/>
+          <stop offset="30%" stop-color="#c9a227"/>
+          <stop offset="50%" stop-color="#fff0a0"/>
+          <stop offset="70%" stop-color="#c9a227"/>
+          <stop offset="100%" stop-color="#2a1c00"/>
+        </linearGradient>
+        <!-- Cup interior -->
+        <radialGradient id="gInterior" cx="50%" cy="30%" r="65%">
+          <stop offset="0%" stop-color="#1a3870"/>
+          <stop offset="40%" stop-color="#080f28"/>
+          <stop offset="100%" stop-color="#020510"/>
+        </radialGradient>
+        <!-- Blue magical glow in cup -->
+        <radialGradient id="gMagic" cx="50%" cy="15%" r="55%">
+          <stop offset="0%" stop-color="rgba(100,180,255,0.35)"/>
+          <stop offset="60%" stop-color="rgba(30,100,255,0.1)"/>
+          <stop offset="100%" stop-color="rgba(10,40,120,0)"/>
+        </radialGradient>
+        <!-- Shadow under base -->
+        <radialGradient id="gShadow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(10,30,80,0.6)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        </radialGradient>
+        <!-- Highlight streak -->
+        <linearGradient id="gShine" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(255,240,150,0.18)"/>
+          <stop offset="100%" stop-color="rgba(255,240,150,0)"/>
+        </linearGradient>
+        <filter id="fGlow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="fGlowStrong">
+          <feGaussianBlur stdDeviation="5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Ground shadow -->
+      <ellipse cx="100" cy="252" rx="52" ry="7" fill="url(#gShadow)"/>
+
+      <!-- ── BASE FOOT ── wide stepped platform -->
+      <!-- Outer foot ellipse top face -->
+      <ellipse cx="100" cy="236" rx="52" ry="9" fill="url(#gBase)" stroke="rgba(201,162,39,0.5)" stroke-width="0.8"/>
+      <!-- Foot side walls -->
+      <path d="M48 236 L48 244 Q100 252 152 244 L152 236 Q100 244 48 236Z" fill="url(#gBase)" opacity="0.9"/>
+      <!-- Foot bottom rim -->
+      <ellipse cx="100" cy="244" rx="52" ry="8" fill="url(#gBase)" stroke="rgba(201,162,39,0.4)" stroke-width="0.6"/>
+      <!-- Inner foot step -->
+      <ellipse cx="100" cy="232" rx="40" ry="7" fill="url(#gBase)" stroke="rgba(201,162,39,0.6)" stroke-width="0.8"/>
+      <!-- Decorative foot ridge beads -->
+      <ellipse cx="68" cy="236" rx="3.5" ry="2" fill="#f0d060" opacity="0.7"/>
+      <ellipse cx="80" cy="238" rx="3.5" ry="2" fill="#f0d060" opacity="0.7"/>
+      <ellipse cx="100" cy="239" rx="3.5" ry="2" fill="#f0d060" opacity="0.7"/>
+      <ellipse cx="120" cy="238" rx="3.5" ry="2" fill="#f0d060" opacity="0.7"/>
+      <ellipse cx="132" cy="236" rx="3.5" ry="2" fill="#f0d060" opacity="0.7"/>
+
+      <!-- ── LOWER STEM ── -->
+      <path d="M88 232 C88 220 84 212 82 200 L118 200 C116 212 112 220 112 232Z" fill="url(#gStem)" stroke="rgba(201,162,39,0.3)" stroke-width="0.5"/>
+      <!-- Stem highlight -->
+      <path d="M96 231 C96 220 94 213 93 201 L101 201 C101 214 100 221 100 231Z" fill="rgba(255,240,150,0.1)"/>
+
+      <!-- ── KNOP (central bulge on stem) ── -->
+      <ellipse cx="100" cy="200" rx="22" ry="10" fill="url(#gKnop)" stroke="rgba(201,162,39,0.7)" stroke-width="1"/>
+      <!-- Knop decorative ring -->
+      <ellipse cx="100" cy="200" rx="18" ry="7.5" fill="none" stroke="rgba(255,240,120,0.5)" stroke-width="0.8"/>
+      <!-- Knop gemstone spots -->
+      <circle cx="82" cy="200" r="3" fill="#1a3870" stroke="rgba(77,166,255,0.8)" stroke-width="0.8"/>
+      <circle cx="100" cy="193" r="3" fill="#1a3870" stroke="rgba(77,166,255,0.8)" stroke-width="0.8"/>
+      <circle cx="118" cy="200" r="3" fill="#1a3870" stroke="rgba(77,166,255,0.8)" stroke-width="0.8"/>
+      <circle cx="100" cy="207" r="3" fill="#1a3870" stroke="rgba(77,166,255,0.8)" stroke-width="0.8"/>
+      <!-- Gem inner glints -->
+      <circle cx="82" cy="200" r="1.2" fill="rgba(100,180,255,0.9)" filter="url(#fGlow)"/>
+      <circle cx="100" cy="193" r="1.2" fill="rgba(100,180,255,0.9)" filter="url(#fGlow)"/>
+      <circle cx="118" cy="200" r="1.2" fill="rgba(100,180,255,0.9)" filter="url(#fGlow)"/>
+      <circle cx="100" cy="207" r="1.2" fill="rgba(100,180,255,0.9)" filter="url(#fGlow)"/>
+
+      <!-- ── UPPER STEM ── -->
+      <path d="M84 168 C84 180 86 192 88 200 L112 200 C114 192 116 180 116 168Z" fill="url(#gStem)" stroke="rgba(201,162,39,0.3)" stroke-width="0.5"/>
+
+      <!-- ── STEM-CUP COLLAR ── -->
+      <ellipse cx="100" cy="168" rx="30" ry="8" fill="url(#gKnop)" stroke="rgba(201,162,39,0.6)" stroke-width="1"/>
+      <!-- Collar bead ring -->
+      <ellipse cx="100" cy="168" rx="26" ry="6" fill="none" stroke="rgba(255,240,120,0.4)" stroke-width="0.6"/>
+      <!-- Collar acanthus leaf hints -->
+      <path d="M72 168 Q76 160 80 168" fill="none" stroke="rgba(201,162,39,0.5)" stroke-width="1"/>
+      <path d="M120 168 Q124 160 128 168" fill="none" stroke="rgba(201,162,39,0.5)" stroke-width="1"/>
+      <path d="M86 162 Q90 155 94 162" fill="none" stroke="rgba(201,162,39,0.4)" stroke-width="0.8"/>
+      <path d="M106 162 Q110 155 114 162" fill="none" stroke="rgba(201,162,39,0.4)" stroke-width="0.8"/>
+
+      <!-- ── CUP BODY ── -->
+      <!-- Cup outer wall (two-piece for gradient control) -->
+      <path d="M70 168 C64 150 56 120 52 90 C48 60 50 35 52 22 L148 22 C150 35 152 60 148 90 C144 120 136 150 130 168Z"
+            fill="url(#gCupSide)" opacity="0.15"/>
+      <!-- Cup main dark interior body -->
+      <path d="M70 168 C64 150 56 120 52 90 C48 60 50 35 52 22 L148 22 C150 35 152 60 148 90 C144 120 136 150 130 168Z"
+            fill="url(#gInterior)"/>
+      <!-- Magic glow inside -->
+      <path d="M70 168 C64 150 56 120 52 90 C48 60 50 35 52 22 L148 22 C150 35 152 60 148 90 C144 120 136 150 130 168Z"
+            fill="url(#gMagic)"/>
+      <!-- Cup outer left edge gold band -->
+      <path d="M70 168 C64 150 56 120 52 90 C48 60 50 35 52 22"
+            stroke="url(#gCupSide)" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- Cup outer right edge gold band -->
+      <path d="M130 168 C136 150 144 120 148 90 C152 60 150 35 148 22"
+            stroke="url(#gCupSide)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+      <!-- Cup vertical decorative ribs -->
+      <path d="M80 166 C76 148 70 118 68 90 C66 70 67 45 68 26" stroke="rgba(201,162,39,0.2)" stroke-width="0.6" fill="none"/>
+      <path d="M90 167 C87 149 83 119 82 91 C81 71 82 46 83 26" stroke="rgba(201,162,39,0.15)" stroke-width="0.5" fill="none"/>
+      <path d="M110 167 C113 149 117 119 118 91 C119 71 118 46 117 26" stroke="rgba(201,162,39,0.15)" stroke-width="0.5" fill="none"/>
+      <path d="M120 166 C124 148 130 118 132 90 C134 70 133 45 132 26" stroke="rgba(201,162,39,0.2)" stroke-width="0.6" fill="none"/>
+
+      <!-- Horizontal band across cup midsection -->
+      <path d="M54 95 C52 96 50 97 52 98 Q100 102 148 98 C150 97 148 96 148 95 Q100 91 54 95Z" fill="url(#gRim)" opacity="0.5"/>
+
+      <!-- Rune engravings on cup body -->
+      <text x="72" y="82" font-size="8" fill="rgba(77,166,255,0.55)" font-family="serif" letter-spacing="2">ᚠ ᚢ ᚦ ᚨ</text>
+      <text x="78" y="120" font-size="7.5" fill="rgba(201,162,39,0.4)" font-family="serif" letter-spacing="2">ᚱ ᚲ ᚷ</text>
+      <text x="100" y="148" font-size="7" fill="rgba(140,100,255,0.35)" font-family="serif" letter-spacing="3" text-anchor="middle">ᚹ ᚺ ᚾ</text>
+
+      <!-- Diamond gem on front of cup -->
+      <polygon points="100,108 106,116 100,124 94,116" fill="#0a1840" stroke="rgba(77,166,255,0.7)" stroke-width="0.8"/>
+      <polygon points="100,110 104,116 100,122 96,116" fill="#1a3870"/>
+      <polygon points="100,110 104,116 100,113" fill="rgba(150,200,255,0.5)"/>
+      <circle cx="100" cy="116" r="1.5" fill="rgba(100,180,255,0.9)" filter="url(#fGlowStrong)"/>
+
+      <!-- Side gem ornaments -->
+      <polygon points="64,100 68,106 64,112 60,106" fill="#0a1840" stroke="rgba(77,166,255,0.5)" stroke-width="0.7"/>
+      <circle cx="64" cy="106" r="1.2" fill="rgba(100,180,255,0.8)" filter="url(#fGlow)"/>
+      <polygon points="136,100 140,106 136,112 132,106" fill="#0a1840" stroke="rgba(77,166,255,0.5)" stroke-width="0.7"/>
+      <circle cx="136" cy="106" r="1.2" fill="rgba(100,180,255,0.8)" filter="url(#fGlow)"/>
+
+      <!-- Cup highlight (specular) -->
+      <path d="M58 60 C60 40 63 28 65 24 L72 24 C69 28 66 40 64 60Z" fill="url(#gShine)" opacity="0.7"/>
+
+      <!-- ── RIM ── -->
+      <!-- Outer rim ring, thick and ornate -->
+      <ellipse cx="100" cy="22" rx="48" ry="11" fill="url(#gRim)" stroke="rgba(201,162,39,0.8)" stroke-width="1.2" filter="url(#fGlow)"/>
+      <!-- Inner rim ring (slightly smaller) -->
+      <ellipse cx="100" cy="22" rx="40" ry="8.5" fill="url(#gInterior)" stroke="rgba(201,162,39,0.4)" stroke-width="0.6"/>
+      <!-- Rim bead decoration -->
+      <ellipse cx="66" cy="22" rx="3" ry="1.8" fill="#f0d060" opacity="0.8"/>
+      <ellipse cx="80" cy="17" rx="3" ry="1.8" fill="#f0d060" opacity="0.8"/>
+      <ellipse cx="100" cy="15" rx="3" ry="1.8" fill="#f0d060" opacity="0.8"/>
+      <ellipse cx="120" cy="17" rx="3" ry="1.8" fill="#f0d060" opacity="0.8"/>
+      <ellipse cx="134" cy="22" rx="3" ry="1.8" fill="#f0d060" opacity="0.8"/>
+      <!-- Rim highlight -->
+      <ellipse cx="100" cy="19" rx="32" ry="5" fill="rgba(255,240,150,0.12)"/>
+
+      <!-- ── HANDLES (wing ears on sides) ── -->
+      <!-- Left handle -->
+      <path d="M52 90 C38 85 30 95 32 110 C34 122 44 128 52 125" fill="none" stroke="url(#gStem)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M52 90 C38 85 30 95 32 110 C34 122 44 128 52 125" fill="none" stroke="rgba(255,240,150,0.15)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Handle knuckle bead left -->
+      <circle cx="33" cy="108" r="4" fill="url(#gKnop)" stroke="rgba(201,162,39,0.7)" stroke-width="0.8"/>
+      <circle cx="33" cy="108" r="1.5" fill="rgba(255,240,150,0.6)"/>
+      <!-- Right handle -->
+      <path d="M148 90 C162 85 170 95 168 110 C166 122 156 128 148 125" fill="none" stroke="url(#gStem)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M148 90 C162 85 170 95 168 110 C166 122 156 128 148 125" fill="none" stroke="rgba(255,240,150,0.15)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Handle knuckle bead right -->
+      <circle cx="167" cy="108" r="4" fill="url(#gKnop)" stroke="rgba(201,162,39,0.7)" stroke-width="0.8"/>
+      <circle cx="167" cy="108" r="1.5" fill="rgba(255,240,150,0.6)"/>
+
+      <!-- ── AMBIENT GLOW beneath cup (blue reflection on surface) ── -->
+      <ellipse cx="100" cy="168" rx="35" ry="6" fill="rgba(26,111,255,0.12)" filter="url(#fGlow)"/>
+    </svg>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-wrap">
+    <div class="form-card" id="formCard">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+
+      <div class="form-title">⚔ Inscribe Your Oath ⚔</div>
+
+      <form id="regForm" novalidate autocomplete="off">
+        <div class="field">
+          <label for="charName">Character Name</label>
+          <input type="text" id="charName" placeholder="Your character's name…" required/>
+        </div>
+        <div class="field">
+          <label for="charClass">Class</label>
+          <select id="charClass" required>
+            <option value="">Select your class…</option>
+            <option>Warrior</option><option>Ranger</option><option>Sorceress</option>
+            <option>Berserker</option><option>Tamer</option><option>Musa</option>
+            <option>Maehwa</option><option>Valkyrie</option><option>Kunoichi</option>
+            <option>Ninja</option><option>Wizard</option><option>Witch</option>
+            <option>Dark Knight</option><option>Striker</option><option>Mystic</option>
+            <option>Lahn</option><option>Archer</option><option>Guardian</option>
+            <option>Hashashin</option><option>Nova</option><option>Sage</option>
+            <option>Corsair</option><option>Drakania</option><option>Woosa</option>
+            <option>Maegu</option><option>Scholar</option><option>Dosa</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="aosPoints">AoS Points</label>
+          <input type="number" id="aosPoints" placeholder="Enter AoS points…" min="0" required/>
+        </div>
+        <div class="field">
+          <label for="guild">Guild</label>
+          <select id="guild" required>
+            <option value="">Select your guild…</option>
+            <option value="WW">WW</option>
+            <option value="CM">CM</option>
+            <option value="KK">KK</option>
+          </select>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="btn-sparks" id="btnSparks"></span>
+          ⚔ &nbsp;Inscribe into the Flame&nbsp; ⚔
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+
+</div><!-- /page -->
+
+<!-- SUBMIT OVERLAY -->
+<div id="submitOverlay">
+  <div class="success-msg" id="successMsg" style="display:none">
+    <div class="s-icon">⚔</div>
+    <h2>Your oath is sealed!</h2>
+    <p id="successText">Your name has been inscribed in the eternal flame.<br>The covenant awaits your blade.</p>
+    <button class="success-close" id="successClose">Close the Ritual</button>
+  </div>
+</div>
+
+
+
+<script>
+// ─── CANVAS PARTICLE SYSTEM ───
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, mouse = {x:0,y:0};
+const particles = [];
+const embers = [];
+
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+class Particle {
+  constructor(){this.reset(true)}
+  reset(init=false){
+    this.x = Math.random()*W;
+    this.y = init ? Math.random()*H : H + 10;
+    this.size = Math.random()*2+.5;
+    this.speedY = -(Math.random()*.4+.1);
+    this.speedX = (Math.random()-.5)*.3;
+    this.life = 1; this.decay = Math.random()*.003+.001;
+    const r = Math.random();
+    if(r<.5) this.color = `rgba(77,166,255,`;
+    else if(r<.8) this.color = `rgba(201,162,39,`;
+    else this.color = `rgba(176,106,255,`;
+  }
+  update(){
+    this.x += this.speedX + (mouse.x/W-.5)*.15;
+    this.y += this.speedY;
+    this.life -= this.decay;
+    if(this.life<=0||this.y<-10) this.reset();
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle = this.color+this.life+')';
+    ctx.fill();
+  }
+}
+
+class Ember {
+  constructor(){this.reset(true)}
+  reset(init=false){
+    const gobletEl = document.querySelector('.goblet-wrap');
+    const rect = gobletEl ? gobletEl.getBoundingClientRect() : {left:W/2-20,top:H/3,width:40,height:40};
+    this.x = rect.left + rect.width/2 + (Math.random()-.5)*30;
+    this.y = init ? Math.random()*H : rect.top + 20;
+    this.size = Math.random()*3+1;
+    this.speedY = -(Math.random()*.8+.4);
+    this.speedX = (Math.random()-.5)*1.2;
+    this.life = 1; this.decay = Math.random()*.008+.004;
+    this.flicker = Math.random()*Math.PI*2;
+  }
+  update(){
+    this.flicker += .15;
+    this.x += this.speedX + Math.sin(this.flicker)*.4;
+    this.y += this.speedY;
+    this.life -= this.decay;
+    if(this.life<=0||this.y<-10) this.reset();
+  }
+  draw(){
+    const a = this.life;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*2);
+    g.addColorStop(0,`rgba(200,230,255,${a})`);
+    g.addColorStop(.5,`rgba(77,166,255,${a*.7})`);
+    g.addColorStop(1,`rgba(26,111,255,0)`);
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
+}
+
+for(let i=0;i<80;i++) particles.push(new Particle());
+for(let i=0;i<25;i++) embers.push(new Ember());
+
+// Mist layers
+const mistLayers = [{x:0,speed:.15,alpha:.04},{x:W*.4,speed:.08,alpha:.03},{x:W*.7,speed:.12,alpha:.035}];
+
+function drawMist(m,t){
+  const grd = ctx.createLinearGradient(0,H*.5,W,H*.5);
+  const phase = Math.sin(t*.0005+m.speed*10)*.5+.5;
+  grd.addColorStop(0,'transparent');
+  grd.addColorStop(.3,`rgba(10,30,80,${m.alpha*(1+phase*.5)})`);
+  grd.addColorStop(.7,`rgba(5,15,50,${m.alpha})`);
+  grd.addColorStop(1,'transparent');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0,H*.3,W,H*.5);
+}
+
+let t=0;
+function animLoop(){
+  requestAnimationFrame(animLoop);
+  ctx.clearRect(0,0,W,H);
+  t++;
+  mistLayers.forEach(m=>{ m.x-=m.speed; if(m.x<-W) m.x=W; drawMist(m,t); });
+  particles.forEach(p=>{p.update();p.draw()});
+  embers.forEach(e=>{e.update();e.draw()});
+}
+animLoop();
+
+// ─── BURST PARTICLES (on submit) ───
+function burst(cx,cy,count=60){
+  for(let i=0;i<count;i++){
+    const angle = (Math.PI*2/count)*i+Math.random()*.2;
+    const speed = Math.random()*6+2;
+    const bp = {
+      x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,
+      life:1,size:Math.random()*3+1,
+      color: Math.random()<.6 ? '77,166,255' : (Math.random()<.5 ? '201,162,39' : '176,106,255')
+    };
+    burstPs.push(bp);
+  }
+}
+const burstPs=[];
+const origLoop = animLoop;
+function extendedLoop(){
+  burstPs.forEach((p,i)=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=.15; p.life-=.02;
+    if(p.life<=0){burstPs.splice(i,1);return}
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${p.color},${p.life})`;
+    ctx.fill();
+    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*3);
+    g.addColorStop(0,`rgba(${p.color},${p.life*.5})`);
+    g.addColorStop(1,`rgba(${p.color},0)`);
+    ctx.fillStyle=g; ctx.fill();
+  });
+}
+// patch into animation loop
+(function patchAnim(){
+  const raf = window.requestAnimationFrame;
+  let frame=0;
+  function loop(){
+    raf(loop); frame++;
+    ctx.clearRect(0,0,W,H);
+    t++;
+    mistLayers.forEach(m=>{m.x-=m.speed;if(m.x<-W)m.x=W;drawMist(m,t)});
+    particles.forEach(p=>{p.update();p.draw()});
+    embers.forEach(e=>{e.update();e.draw()});
+    extendedLoop();
+  }
+  loop();
+})();
+
+// ─── PARALLAX ───
+const page = document.getElementById('pageRoot');
+document.addEventListener('mousemove',e=>{
+  const dx=(e.clientX/window.innerWidth-.5)*18;
+  const dy=(e.clientY/window.innerHeight-.5)*10;
+  page.style.transform=`translate(${dx*.15}px,${dy*.1}px)`;
+});
+
+// ─── BUTTON SPARK EFFECT ───
+const submitBtn = document.getElementById('submitBtn');
+submitBtn.addEventListener('mousemove',e=>{
+  const rect=submitBtn.getBoundingClientRect();
+  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const spark=document.createElement('div');
+  spark.style.cssText=`position:absolute;width:4px;height:4px;border-radius:50%;
+    background:rgba(201,162,39,0.9);left:${x}px;top:${y}px;pointer-events:none;
+    animation:sparkFade .5s forwards`;
+  document.getElementById('btnSparks').appendChild(spark);
+  setTimeout(()=>spark.remove(),500);
+});
+const sparkStyle=document.createElement('style');
+sparkStyle.textContent='@keyframes sparkFade{0%{transform:scale(1) translate(0,0);opacity:1}100%{transform:scale(0) translate('+(Math.random()*20-10)+'px,-20px);opacity:0}}';
+document.head.appendChild(sparkStyle);
+
+// ⚠️ REPLACE THIS with your Google Apps Script web app URL
+const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+// ─── LOCAL STORAGE ───
+const STORAGE_KEY='bdo_guild_reg_v1';
+function load(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}
+  catch{return []}
+}
+function save(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
+let registrations=load();
+
+// ─── SUBMIT FORM ───
+const form = document.getElementById('regForm');
+const overlay = document.getElementById('submitOverlay');
+const successMsg = document.getElementById('successMsg');
+const successText = document.getElementById('successText');
+
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=document.getElementById('charName').value.trim();
+  const cls=document.getElementById('charClass').value;
+  const aos=document.getElementById('aosPoints').value;
+  const guild=document.getElementById('guild').value;
+  if(!name||!cls||!aos||!guild){
+    // shake invalid fields
+    [['charName',!name],['charClass',!cls],['aosPoints',!aos],['guild',!guild]].forEach(([id,bad])=>{
+      if(bad){
+        const el=document.getElementById(id);
+        el.style.animation='shake .4s';
+        setTimeout(()=>el.style.animation='',400);
+      }
+    });
+    const shakeKf=document.createElement('style');
+    shakeKf.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}';
+    document.head.appendChild(shakeKf);
+    return;
+  }
+
+  // Fly text animation
+  const nameInput=document.getElementById('charName');
+  const rect=nameInput.getBoundingClientRect();
+  const gobletEl=document.querySelector('.goblet-wrap');
+  const gRect=gobletEl.getBoundingClientRect();
+
+  const flyEl=document.createElement('div');
+  flyEl.className='fly-text';
+  flyEl.textContent=name;
+  flyEl.style.left=rect.left+'px';
+  flyEl.style.top=rect.top+'px';
+  flyEl.style.fontSize='1.2rem';
+  flyEl.style.color='#f0d060';
+  flyEl.style.textShadow='0 0 20px #c9a227, 0 0 40px #4da6ff';
+  flyEl.style.zIndex='300';
+  document.body.appendChild(flyEl);
+
+  // Animate fly to goblet
+  const targetX = gRect.left + gRect.width/2;
+  const targetY = gRect.top + gRect.height/3;
+  const startX = rect.left + rect.width/2;
+  const startY = rect.top + rect.height/2;
+
+  let progress=0;
+  const anim=setInterval(()=>{
+    progress+=.04;
+    if(progress>=1){
+      clearInterval(anim);
+      flyEl.remove();
+      // burst at goblet
+      burst(targetX,targetY,80);
+      // store
+      registrations.push({name,cls,aos:Number(aos),guild});
+      save(registrations);
+      // Send to Google Sheets
+      fetch(APPS_SCRIPT_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,cls,aos:Number(aos),guild,timestamp:new Date().toISOString()})
+      }).catch(()=>{});
+      form.reset();
+      // success message
+      successText.textContent=`${name} the ${cls} has been inscribed in the eternal flame. The covenant awaits your blade.`;
+      overlay.classList.add('active');
+      successMsg.style.display='block';
+      return;
+    }
+    const t=1-Math.pow(1-progress,3); // ease out cubic
+    const cx = startX + (targetX-startX)*t;
+    const cy = startY + (targetY-startY)*t - Math.sin(t*Math.PI)*80;
+    const scale = 1 - t*.6;
+    const alpha = 1 - t*.3;
+    flyEl.style.transform=`translate(${cx-startX}px,${cy-startY}px) scale(${scale})`;
+    flyEl.style.opacity=alpha;
+  },16);
+});
+
+// ─── SUCCESS CLOSE ───
+document.getElementById('successClose').addEventListener('click',()=>{
+  overlay.classList.remove('active');
+  successMsg.style.display='none';
+});
+overlay.addEventListener('click',e=>{
+  if(e.target===overlay){ overlay.classList.remove('active'); successMsg.style.display='none'; }
+});
+
+// ─── INIT ───
+
+// Sound placeholders (connect your audio engine here)
+// function playFlameSound(){ /* audioCtx.play('flame_ignite.mp3') */ }
+// function playSuccessSound(){ /* audioCtx.play('ritual_complete.mp3') */ }
+// function playEmberCrackle(){ /* audioCtx.play('embers.mp3') */ }
+</script>
+</body>
+</html>
